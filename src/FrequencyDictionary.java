@@ -1,100 +1,92 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class FrequencyDictionary {
+    /*
+    Это по старой схеме программы.
+    в первый раз 0.225 сек , во второй 0.119 сек, в третий 0.111 сек, в четвертый 0.107 сек, в пятый 0.104 сек.
+    Дальнейшие тесты показали что время выполнения находятся примерно в интервале 0.095-0.145 cек.
+    ***********************************************************************************************
+    После изменения способа сортировки массива через Arrays.sort скорость упала.
+    Тесты показали что время выполнения находятся примерно в интервале 0.12-0.15 cек.
+    ***********************************************************************************************
+    После оптимизации время выполнения стало 0.003-0.008 сек. Сам в шоке)))
+     */
+
     private File file = new File("D:\\Intelij project\\Lab8\\src\\FreqDictFile.txt");
 
-    public static void main(String[] args) throws Exception {
-        FrequencyDictionary frequencyDictionary = new FrequencyDictionary();
-        String stringRead = frequencyDictionary.openAndReadFile(frequencyDictionary.file);
-        stringRead = frequencyDictionary.deletesNonStandardCharacters(stringRead);
-        String stringWithoutDuplicates = frequencyDictionary.removeDuplicates(stringRead);
-        String[][] map = frequencyDictionary.createArray(stringWithoutDuplicates);
-        map = frequencyDictionary.countsFrequencyDuplicate(map, stringRead);
-        frequencyDictionary.bubbleSort(map);
-        for (int i = 0; i < map.length; i++) {
-            System.out.println(map[i][0] + " - " + map[i][1]);
-        }
-    }
 
-    public String removeDuplicates(String input) {
-        String result = "";
-        for (int i = 0; i < input.length(); i++) {
-            if (!result.contains(String.valueOf(input.charAt(i)))) {
-                result += String.valueOf(input.charAt(i));
+    public boolean checksArray(String[][] array, char letter) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i][0].compareTo(String.valueOf(letter)) == 0) {
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
-    public String[][] createArray(String string) {
-        String[][] map = new String[string.length()][2];
-        for (int i = 0; i < string.length(); i++) {
-            map[i][0] = String.valueOf(string.charAt(i));
-            map[i][1] = "";
-        }
-        return map;
-    }
-
-    public String[][] countsFrequencyDuplicate(String[][] array, String string) {
+    public void addsCountArray(String[][] array, char letter) {
         for (int i = 0; i < array.length; i++) {
-            char letter = array[i][0].charAt(0);
-            int counts = (int) string.chars().filter(ch -> ch == letter).count();
-            array[i][1] = String.valueOf(counts);
+            if (array[i][0].compareTo(String.valueOf(letter)) == 0) {
+                int count = Integer.parseInt(array[i][1]) + 1;
+                array[i][1] = Integer.toString(count);
+            }
         }
-        return array;
     }
 
-    public void bubbleSort(String[][] arr) {
-        for (int i = arr.length - 1; i > 0; i--) {
-            boolean valid = true;
-            for (int j = 0; j < i; j++) {
-                if (checksNumbers (arr [j][1],arr[j+1][1]) < 0) {
-                    valid = false;
-                    String tmp = arr[j][1];
-                    String letter = arr[j][0];
-                    arr[j][1] = arr[j + 1][1];
-                    arr[j][0] = arr[j + 1][0];
-                    arr[j + 1][1] = tmp;
-                    arr[j + 1][0] = letter;
-                } else if (checksNumbers (arr [j][1],arr[j+1][1]) ==0 && arr[j][0].compareTo(arr[j + 1][0]) > 0) {
-                    valid = false;
-                    String letter = arr[j][0];
-                    arr[j][0] = arr[j + 1][0];
-                    arr[j + 1][0] = letter;
+    public String[][] addsNewLetter(String[][] array, char letter) {
+        String[][] arrs = new String[array.length + 1][2];
+        for (int i = 0; i < array.length; i++) {
+            arrs[i][0] = array[i][0];
+            arrs[i][1] = array[i][1];
+        }
+        arrs[array.length][0] = String.valueOf(letter);
+        arrs[array.length][1] = String.valueOf(1);
+        return arrs;
+    }
+
+    public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
+        String[][] array = new String[0][2];
+
+        FrequencyDictionary frequencyDictionary = new FrequencyDictionary();
+        FileReader reader = new FileReader(frequencyDictionary.file);
+        for (int i = 0; i < frequencyDictionary.file.length(); i++) {
+            char letter = (char) Character.toLowerCase(reader.read());
+            if (Character.isLetter(letter)) {
+                if (frequencyDictionary.checksArray(array, letter)) {
+                    frequencyDictionary.addsCountArray(array, letter);
+                } else {
+                    array = frequencyDictionary.addsNewLetter(array, letter);
                 }
             }
-            if (valid) {
-                break;
+        }
+
+        frequencyDictionary.arraysSort(array);
+        for (int i = 0; i < array.length; i++) {
+            System.out.println(array[i][0] + " - " + array[i][1]);
+        }
+
+        long elapsedTimeMillis = System.currentTimeMillis() - start;
+        float elapsedTimeSec = elapsedTimeMillis / 1000F;
+        System.out.println("Program working time: " + elapsedTimeSec + " sec.");
+    }
+
+    private void arraysSort(String[][] array) {
+        Arrays.sort(array, new someComparator());
+    }
+
+    public class someComparator implements Comparator<String[]> {
+        public int compare(String[] row1, String[] row2) {
+            int value1 = Integer.parseInt(row1[1]);
+            int value2 = Integer.parseInt(row2[1]);
+            String key1 = row1[0];
+            String key2 = row2[0];
+            if (value1 == value2 && key1.compareTo(key2) < 0) {
+                return key1.compareTo(key2);
             }
+            return Integer.compare(value2, value1);
         }
-    }
-
-    public static int checksNumbers(String firstNumber, String secondNumber ){
-int firstDigit = Integer.parseInt(firstNumber);
-int secondDigit = Integer.parseInt(secondNumber);
-if (firstDigit>secondDigit){
-    return 1;
-} else if (firstDigit<secondDigit){
-    return -1;
-} else {
-    return 0;
-}
-    }
-
-    public String deletesNonStandardCharacters(String stringRead) {
-        return stringRead.replaceAll("[^a-z]", "");
-    }
-
-    public String openAndReadFile(File file) throws FileNotFoundException {
-        Scanner fileScanner = new Scanner(file);
-        StringBuilder builder = new StringBuilder();
-        while (fileScanner.hasNextLine()) {
-            String string = fileScanner.nextLine();
-            string = string.toLowerCase();
-            builder.insert(builder.length(), string);
-        }
-        return builder.toString();
     }
 }
