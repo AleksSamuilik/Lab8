@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.regex.Pattern;
 
 public class FrequencyDictionary {
     private static final int LETTER_A = 97;
@@ -19,21 +18,21 @@ public class FrequencyDictionary {
     private File file = new File("D:\\Intelij project\\Lab8\\src\\A tale two city.txt");
 
 
-    private void addCountArray(long[] array, char letter) {
+    private void addCountArray(int[] array, char letter) {
         int index = letter - LETTER_A;
-        array[index]+=1;
+        array[index]++;
     }
 
 
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
-        long[] countArray = new long[26];
+        int[] countArray = new int[26];
 
         FrequencyDictionary frequencyDictionary = new FrequencyDictionary();
         FileReader reader = new FileReader(frequencyDictionary.file);
         for (int i = 0; i < frequencyDictionary.file.length(); i++) {
             char letter = (char) Character.toLowerCase(reader.read());
-            if (97<=letter&&letter>=122) {
+            if (97 <= letter && letter <= 122) {
                 frequencyDictionary.addCountArray(countArray, letter);
             }
         }
@@ -43,7 +42,7 @@ public class FrequencyDictionary {
         System.out.println("Program working time: " + elapsedTimeSec + " sec.");
     }
 
-    private Object[][] createArrayLetterNumber(long[] countArray) {
+    private Object[][] createArrayLetterNumber(int[] countArray) {
         Object[][] finalArray = new Object[countArray.length][2];
         for (int i = 0; i < finalArray.length; i++) {
             finalArray[i][0] = Character.valueOf((char) (LETTER_A + i));
@@ -58,21 +57,23 @@ public class FrequencyDictionary {
 
     private class someComparator implements Comparator<Object[]> {
         public int compare(Object[] row1, Object[] row2) {
-            long value1 = (long) row1[1];
-            long value2 = (long) row2[1];
+            int value1 = (int) row1[1];
+            int value2 = (int) row2[1];
             char key1 = (char) row1[0];
             char key2 = (char) row2[0];
             if (value1 == value2 && key1 < key2) {
                 return Character.compare(key1, key2);
             }
-            return Long.compare(value2, value1);
+            return Integer.compare(value2, value1);
         }
     }
 
     private void printMessage(Object[][] finalArray) {
         arraysSort(finalArray);
         for (int i = 0; i < finalArray.length; i++) {
-            if ((long) finalArray[i][1] != 0) {
+            if ((int) finalArray[i][1] == 0) {
+                continue;
+            } else {
                 System.out.println(finalArray[i][0] + " - " + finalArray[i][1]);
             }
         }
