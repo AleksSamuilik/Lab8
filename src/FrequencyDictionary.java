@@ -1,6 +1,10 @@
-import java.io.*;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class FrequencyDictionary {
     private static final int LETTER_A = 97;
@@ -14,7 +18,7 @@ public class FrequencyDictionary {
     ***********************************************************************************************
     После оптимизации время выполнения стало 0.003-0.008 сек. Сам в шоке)))
 */
-
+//FreqDictFile
     private File file = new File("D:\\Intelij project\\Lab8\\src\\A tale two city.txt");
 
 
@@ -32,50 +36,40 @@ public class FrequencyDictionary {
         FileReader reader = new FileReader(frequencyDictionary.file);
         for (int i = 0; i < frequencyDictionary.file.length(); i++) {
             char letter = (char) Character.toLowerCase(reader.read());
-            if (97 <= letter && letter <= 122) {
+            if (LETTER_A <= letter && letter <= 122) {
                 frequencyDictionary.addCountArray(countArray, letter);
             }
         }
-        frequencyDictionary.printMessage(frequencyDictionary.createArrayLetterNumber(countArray));
+        frequencyDictionary.printMessage(frequencyDictionary.createMap(countArray));
         long elapsedTimeMillis = System.currentTimeMillis() - start;
         float elapsedTimeSec = elapsedTimeMillis / 1000F;
         System.out.println("Program working time: " + elapsedTimeSec + " sec.");
     }
 
-    private Object[][] createArrayLetterNumber(int[] countArray) {
-        Object[][] finalArray = new Object[countArray.length][2];
-        for (int i = 0; i < finalArray.length; i++) {
-            finalArray[i][0] = Character.valueOf((char) (LETTER_A + i));
-            finalArray[i][1] = countArray[i];
-        }
-        return finalArray;
-    }
-
-    private void arraysSort(Object[][] array) {
-        Arrays.sort(array, new someComparator());
-    }
-
-    private class someComparator implements Comparator<Object[]> {
-        public int compare(Object[] row1, Object[] row2) {
-            int value1 = (int) row1[1];
-            int value2 = (int) row2[1];
-            char key1 = (char) row1[0];
-            char key2 = (char) row2[0];
-            if (value1 == value2 && key1 < key2) {
-                return Character.compare(key1, key2);
-            }
-            return Integer.compare(value2, value1);
-        }
-    }
-
-    private void printMessage(Object[][] finalArray) {
-        arraysSort(finalArray);
-        for (int i = 0; i < finalArray.length; i++) {
-            if ((int) finalArray[i][1] == 0) {
+    public List createMap(int[] array) {
+        List<SymbolFrequency> list = new ArrayList<>();
+        HashMap<Character, Integer> h = new HashMap<>();
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == 0) {
                 continue;
             } else {
-                System.out.println(finalArray[i][0] + " - " + finalArray[i][1]);
+                h.put((char) (LETTER_A + i), array[i]);
             }
+        }
+
+        for (Entry<Character, Integer> value : h.entrySet()) {
+            SymbolFrequency a = new SymbolFrequency(value.getKey(),
+                    value.getValue());
+            list.add(a);
+        }
+
+        Collections.sort(list);
+        return list;
+    }
+
+    private void printMessage(List list) {
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i));
         }
     }
 }
