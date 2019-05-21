@@ -1,13 +1,8 @@
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.*;
 
 public class FrequencyDictionary {
-    private static final int LETTER_A = 97;
     /*
     Это по старой схеме программы.
     в первый раз 0.225 сек , во второй 0.119 сек, в третий 0.111 сек, в четвертый 0.107 сек, в пятый 0.104 сек.
@@ -18,15 +13,14 @@ public class FrequencyDictionary {
     ***********************************************************************************************
     После оптимизации время выполнения стало 0.003-0.008 сек. Сам в шоке)))
 */
-//FreqDictFile
+    //FreqDictFile
+    //A tale two city
     private File file = new File("D:\\Intelij project\\Lab8\\src\\A tale two city.txt");
 
-
     private void addCountArray(int[] array, char letter) {
-        int index = letter - LETTER_A;
+        int index = letter - 'a';
         array[index]++;
     }
-
 
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
@@ -36,40 +30,47 @@ public class FrequencyDictionary {
         FileReader reader = new FileReader(frequencyDictionary.file);
         for (int i = 0; i < frequencyDictionary.file.length(); i++) {
             char letter = (char) Character.toLowerCase(reader.read());
-            if (LETTER_A <= letter && letter <= 122) {
+            if ('a' <= letter && letter <= 'z') {
                 frequencyDictionary.addCountArray(countArray, letter);
             }
         }
-        frequencyDictionary.printMessage(frequencyDictionary.createMap(countArray));
+        SortedSet<SymbolFrequency> sortedSet = frequencyDictionary.createMap(countArray);
+        for (SymbolFrequency symbolFrequency : sortedSet) {
+            System.out.println(symbolFrequency.value + " - " + symbolFrequency.key);
+        }
         long elapsedTimeMillis = System.currentTimeMillis() - start;
         float elapsedTimeSec = elapsedTimeMillis / 1000F;
         System.out.println("Program working time: " + elapsedTimeSec + " sec.");
     }
 
-    public List createMap(int[] array) {
-        List<SymbolFrequency> list = new ArrayList<>();
-        HashMap<Character, Integer> h = new HashMap<>();
+    public SortedSet createMap(int[] array) {
+        SortedSet<SymbolFrequency> sortedSet = new TreeSet<SymbolFrequency>();
         for (int i = 0; i < array.length; i++) {
             if (array[i] == 0) {
                 continue;
             } else {
-                h.put((char) (LETTER_A + i), array[i]);
+                sortedSet.add(new SymbolFrequency(array[i], (char) ('a' + i)));
             }
         }
+        return sortedSet;
+    }
+}
 
-        for (Entry<Character, Integer> value : h.entrySet()) {
-            SymbolFrequency a = new SymbolFrequency(value.getKey(),
-                    value.getValue());
-            list.add(a);
-        }
+class SymbolFrequency implements Comparable<SymbolFrequency> {
+    public char value;
+    public int key;
 
-        Collections.sort(list);
-        return list;
+    public SymbolFrequency(int key, char value) {
+        this.key = key;
+        this.value = value;
     }
 
-    private void printMessage(List list) {
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i));
-        }
+    @Override
+    public int compareTo(SymbolFrequency o) {
+        return key == o.key ? value - o.value : o.key - key;
+    }
+
+    public String toString() {
+        return this.key + " - " + this.value;
     }
 }
