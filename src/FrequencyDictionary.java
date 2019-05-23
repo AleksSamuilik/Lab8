@@ -54,23 +54,24 @@ public class FrequencyDictionary {
         }
         return sortedSet;
     }
-}
 
-class SymbolFrequency implements Comparable<SymbolFrequency> {
-    public char value;
-    public int key;
 
-    public SymbolFrequency(int key, char value) {
-        this.key = key;
-        this.value = value;
-    }
+    private static class SymbolFrequency implements Comparable<SymbolFrequency> {
+        public char value;
+        public int key;
 
-    @Override
-    public int compareTo(SymbolFrequency o) {
-        return key == o.key ? value - o.value : o.key - key;
-    }
+        public SymbolFrequency(int key, char value) {
+            this.key = key;
+            this.value = value;
+        }
 
-    public String toString() {
-        return this.key + " - " + this.value;
+        @Override
+        public int compareTo(SymbolFrequency o) {
+            return key == o.key ? value - o.value : o.key - key;
+        }
+
+        public String toString() {
+            return this.key + " - " + this.value;
+        }
     }
 }
